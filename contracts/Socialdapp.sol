@@ -40,4 +40,18 @@ contract SocialDapp is ERC721URIStorage {
     // Constructor function to initialize the contract with the name and symbol of the NFT
     constructor() ERC721("SocialDapp", "DAPP") {}
 
+    function mint(string memory _tokenURI) 
+    external returns (uint256) {
+        // Increment the token count
+        tokenCount++;
+        // Mint the new NFT and assign it to the caller's address
+        _safeMint(msg.sender, tokenCount);
+        // Set the token URI for the new NFT
+        _setTokenURI(tokenCount, _tokenURI);
+        // Set the new NFT as the caller's profile
+        setProfile(tokenCount);
+        // Return the ID of the new NFT
+        return (tokenCount);
+    }
+
 }
