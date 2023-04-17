@@ -53,5 +53,40 @@ contract SocialDapp is ERC721URIStorage {
         // Return the ID of the new NFT
         return (tokenCount);
     }
+    
+    // Function to set the caller's profile to a specific NFT they own
+    function setProfile(uint256 _id) public {
+        // Ensure that the caller owns the NFT they want to set as their profile
+        require(
+            ownerOf(_id) == msg.sender,
+            "Must own the nft you want to select as your profile"
+        );
+        // Store the ID of the selected NFT as the caller's profile
+        profiles[msg.sender] = _id;
+    }
+
+    // Function to upload a new post
+    function uploadPost(string memory _postHash) external {
+        // Ensure that the caller owns at least one NFT
+        require(
+            balanceOf(msg.sender) > 0,
+            "Must own a Social Dapp nft to post"
+        );
+        // Ensure that the post hash is not empty
+        require(bytes(_postHash).length > 0, "Cannot pass an empty hash");
+        // Increment the post count
+        postCount++;
+        // Create a new Post struct to store the post details
+        Post memory newPost = Post(
+            postCount,
+            _postHash,
+            0,
+            payable(msg.sender)
+        );
+        // Store the new post in the mapping by its ID
+        posts[postCount] = newPost;
+        // Emit a PostCreated event to signal the creation of a new post
+        emit PostCreated(postCount, _postHash, 0, payable(msg.sender));
+    }
 
 }
