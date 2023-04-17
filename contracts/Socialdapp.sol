@@ -88,5 +88,21 @@ contract SocialDapp is ERC721URIStorage {
         // Emit a PostCreated event to signal the creation of a new post
         emit PostCreated(postCount, _postHash, 0, payable(msg.sender));
     }
-
+    // Function to like a post and pay the author
+    function likePost(uint256 _id) external payable {
+        // Ensure that the post ID is valid
+        require(_id > 0 && _id <= postCount, "Invalid post id");
+        // Get the post from the mapping by its ID
+        // fetch the post
+        Post memory _post = posts[_id];
+        require(_post.author != msg.sender, "Cannot like your own post");
+        //pay the author by sending them ether
+        _post.author.transfer(msg.value);
+        //increment like amount
+        _post.likes += msg.value;
+        // update the image
+        posts[_id] = _post;
+        //trigger the event
+        emit PostLiked(_id, _post.hash, _post.likes, _post.author);
+    }
 }
