@@ -105,4 +105,14 @@ contract SocialDapp is ERC721URIStorage {
         //trigger the event
         emit PostLiked(_id, _post.hash, _post.likes, _post.author);
     }
+    // Returns an array of all the posts that have been uploaded to the contract
+    function getAllPosts() external view returns (Post[] memory _posts) {
+        // Create a new array to store the posts
+        _posts = new Post[](postCount);
+        // Loop through each post in the mapping
+        for (uint256 i = 0; i < _posts.length; i++) {
+            // Add the post to the array (using i+1 as the index because post IDs start at 1)
+            _posts[i] = posts[i + 1];
+        }
+    }
 }
