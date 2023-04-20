@@ -5,8 +5,9 @@ import SocialDappabi from './contractsData/SocialDapp.json'
 import SocialDappAddress from './contractsData/SocialDapp-address.json'
 import { Spinner, Navbar, Nav, Button, Container } from 'react-bootstrap'
 import Home from './Home.js'
+import Profile from './Profile.js'
 import logo from './images.jpeg'
-import './App.css';
+import './App.css'
 import CreateUser from "./components/CreateUser";
 
 function App() {
@@ -91,7 +92,9 @@ function App() {
               <Route path="/" element= {
               <Home contract = {contract} account = {account}/>
               }/>
-              <Route path="/profile" />
+              <Route path="/profile" element={
+                <Profile contract = {contract}/>
+              } />
             </Routes>
           )}
         </div>
