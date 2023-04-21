@@ -1,9 +1,9 @@
-import './App.css';
+import CreateUser from "./components/CreateUser";
 
 function App() {
   return (
-    'hello world'
-  );
+    <CreateUser />
+  )
 }
 
 export default App;
