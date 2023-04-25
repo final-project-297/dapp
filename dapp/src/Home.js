@@ -38,6 +38,7 @@ const Home = ({ contract, account }) =>{
                 username: metadataProfile.username,
                 avatar: metadataProfile.avatar
             }
+            //defining post object
             let post = {
                 id: i.id,
                 content: metadataPost.post,
@@ -46,39 +47,43 @@ const Home = ({ contract, account }) =>{
             }
             return post
         }))  
+        //sorting post by most liked(tipped)
         posts = posts.sort((a,b) => b.tipAmount - a.tipAmount)
         setPosts(posts)
         setLoading(false)
     }
+    // loading posts if none appeared yet
     useEffect(() => {
         if(!posts) {
             loadPosts()
         }
     })
     const uploadPost = async() =>{
-        if(!post) return
+        if(!post) return //if there is no post, return and do not proceed
         let hash
         //uplaod post to IPFS
         try{
-            const result = await client.add(JSON.stringify({post}))
-            setLoading(true)
-            hash = result.path
+            const result = await client.add(JSON.stringify({post})) //add the post to IPFS and get the resulting hash
+            setLoading(true) //set loading state to true
+            hash = result.path //store the hash in the 'hash' variable
         } catch (error){
-            window.alert("ipfs image upload error:", error)
+            window.alert("ipfs image upload error:", error) //if there is an error uploading the post to IPFS, show an alert with the error message
         }
         //upload post to blockchain
-        await(await contract.uploadPost(hash)).wait()
-        loadPosts()
+        await(await contract.uploadPost(hash)).wait() //upload the hash of the post to the blockchain using the 'uploadPost' function in the 'contract' object
+        loadPosts() //load all posts from the blockchain
     }
+    
     const tip = async(post)=>{
         //tip post owner
-        await(await contract.tipPostOwner(post.id,{value: ethers.utils.parseEther("0.1")})).wait()
-        loadPosts()
+        await(await contract.tipPostOwner(post.id,{value: ethers.utils.parseEther("0.1")})).wait() //tip the owner of the post using the 'tipPostOwner' function in the 'contract' object with a value of 0.1 ether
+        loadPosts() //load all posts from the blockchain
     }
+    
     if (!loading) return(
         <div className = 'text-center'>
             <main style = {{ padding : "1rem 0"}}>
-                <h2>Loading...</h2>
+                <h2>Loading...</h2> //if 'loading' is true, display a loading message
             </main>
         </div>
     )

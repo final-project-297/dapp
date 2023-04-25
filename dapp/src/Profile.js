@@ -20,6 +20,7 @@ const Profile = ({ contract }) => {
             // fetch nft metadata
             const response = await fetch(uri)
             const metadata = await response.json()
+            // returning nft object
             return ({
                 id: i,
                 username: metadata.username,
@@ -27,33 +28,45 @@ const Profile = ({ contract }) => {
             })
         }))
         setNfts(nfts)
-        setProfile(nfts)
+        getProfile(nfts)
     }
     const getProfile = async (nfts) => {
+        // get address of account thats connected to the app
         const address = await contract.signer.getAddress()
+        // getting nft profile and id that corresponds
         const id = await contract.profiles(address)
+        // finding nft that matches the returned id in the array, then set to profile variable
         const profile = nfts.find((i) => i.id.toString() === id.toString())
         setProfile(profile)
         setLoading(false)
     }
+
     const uploadToIPFS = async (event) => {
         event.preventDefault()
+        // select image file from event(first element of arry)
         const file = event.target.files[0]
+        //make sure user inputed a file
         if (typeof file !== 'undefined') {
             try {
+                //try catch hook, adding filing to ipfs
                 const result = await client.add(file)
-                setAvatar(`https://ipfs.infura.io/ipfs${result.path}`)
+                setAvatar(`https://ipfs.infura.io/ipfs/${result.path}`)
             } catch (error) {
                 window.alert("ipfs image upload error: ", error)
             }
         }
     }
     const mintProfile = async (event) => {
+        //triggered when button to submit profile has been pressed
         if (!avatar || !username) return
+
         try {
+            //adding avatar and username to ipfs, turned to json string object
             const result = await client.add(JSON.stringify({ avatar, username }))
             setLoading(true)
-            await (await contract.mint(`https://ipfs.infura.io/ipfs${result.path}`)).wait()
+            // calling mint function on contract passing in token URI/ metadate
+            //and wait for transaction receipt to return
+            await (await contract.mint(`https://ipfs.infura.io/ipfs/${result.path}`)).wait()
             loadMyNFTs()
         } catch (error) {
             window.alert("ipfs uri upload error: ", error)
@@ -61,10 +74,14 @@ const Profile = ({ contract }) => {
     }
     const switchProfile = async (nft) => {
         setLoading(true)
+        // call setprofile from contract passing id of nft and waiting
+        // for transaction receuipt to return
         await (await contract.setProfile(nft.id)).wait()
+        // update profile
         getProfile(nfts)
     }
     useEffect(() => {
+        // check if nfts is a faulty value
         if (!nfts) {
             loadMyNFTs()
         }
@@ -102,36 +119,35 @@ const Profile = ({ contract }) => {
                     </div>
                 </main>
             </div>
+            <div className = "px-5 container">
+                <Row xs={1} md={2} lg={4} className = "g-4 py-5">
+                    {nfts.map ((nft, idx) => {
+                        if(nft.id === profile.id) return
+                        return(
+                            <Col key={idx} className = "overflow-hidden">
+                                <Card>
+                                    <Card.Img variant = "top" src = {nft.avatar}/>
+                                    <Card.Body color = "secondary">
+                                        <Card.Title>{nft.username}</Card.Title>
+                                    </Card.Body>
+                                    <Card.Footer>
+                                        <div className = 'd-grid'>
+                                            <Button onClick ={()=> switchProfile(nft)} variant = "primary" size = "lg">
+                                                Set as Profile
+                                            </Button>
+                                        </div>
+                                    </Card.Footer>
+                                </Card>
+                            </Col>
+                        )
+                    })}
+                </Row>
+            </div>
         </div>
-        // the code below would go right above the last </div>
     );
 }
 
 export default Profile;
-// this part right here doesn't work, if it did the dapp would work 100% correctly
 /*
-<div className = "px-5 container">
-<Row xs={1} md={2} lg={4} className = "g-4 py-5">
-    {nfts.map ((nft,idx)=> {
-        if(nft.id === profile.id) return
-        return(
-            <Col key={idx} className = "overflow-hidden">
-                <Card>
-                    <Card.Img variant = "top" src = {nft.avatar}/>
-                    <Card.Body color = "secondary">
-                        <Card.Title>{nft.username}</Card.Title>
-                    </Card.Body>
-                    <Card.Footer>
-                        <div className = 'd-grid'>
-                            <Button onClick ={()=> switchProfile(nft)} variant = "primary" size = "lg">
-                                Set as Profile
-                            </Button>
-                        </div>
-                    </Card.Footer>
-                </Card>
-            </Col>
-        )
-    })}
-</Row>
-</div>
+
 */
